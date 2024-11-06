@@ -61,6 +61,38 @@ def get_stock_predictions():
         })
     return jsonify(stock_predictions)
 
+# Function for rule-based stock recommendations
+# This function takes delivery time and storage limit into account to suggest actions for each medicine
+def recommend_stock_action(medicine, delivery_days, storage_limit):
+    # Estimate days left for stock
+    days_left = estimate_days_until_stockout(medicine)
+    
+    # Apply rule-based reasoning
+    if days_left < delivery_days:
+        return f"Order immediately, stock will run out in {days_left:.1f} days."
+    elif medicine["current_stock"] > storage_limit:
+        return "Order less frequently due to storage constraints."
+    elif days_left < delivery_days * 2:
+        return "Consider ordering soon to avoid stockouts."
+    else:
+        return "Stock level is sufficient for now."
+
+# Route to get stock recommendations based on rules
+# This route provides stock recommendations for each medicine by applying rule-based logic
+@app.route('/stock-recommendations')
+def get_stock_recommendations():
+    recommendations = []
+    delivery_days = 3  # Example: Assume delivery takes 3 days
+    storage_limit = 200  # Example: Set a storage limit of 200 units for each item
+
+    for medicine in medicines:
+        action = recommend_stock_action(medicine, delivery_days, storage_limit)
+        recommendations.append({
+            "name": medicine["name"],
+            "recommendation": action
+        })
+    return jsonify(recommendations)
+
 # Run the app
 # This checks if the file is being run directly and, if so, starts the Flask server in debug mode for easy testing
 if __name__ == '__main__':
