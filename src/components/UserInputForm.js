@@ -5,20 +5,30 @@ const UserInputForm = () => {
     const [medicines, setMedicines] = useState([{ name: '', stock: '', demand: '' }]);
     // State to hold alert messages
     const [alertMessage, setAlertMessage] = useState('');
-
+    
     // Handle form submission: Check for low stock and log submitted data
     const handleSubmit = (e) => {
         e.preventDefault();
+        let alerts = []; // Array to collect multiple alerts
+
         medicines.forEach(medicine => {
             if (medicine.stock <= 20) {
-                setAlertMessage(`Warning: Low stock for ${medicine.name}!`);
-            } else {
-                setAlertMessage(''); // Clear alert if conditions are met
+                alerts.push(`Warning: Low stock for ${medicine.name}!`);
             }
         });
 
+        // Set the alert message based on collected alerts
+        if (alerts.length > 0) {
+            setAlertMessage(alerts.join(' ')); // Join alerts into a single string
+        } else {
+            setAlertMessage(''); // Clear alert if no conditions are met
+        }
+
         console.log('Form submitted with values:', medicines); // For demonstration purposes
     };
+
+
+
 
     // Handle input changes: Update state for a specific field of a specific medicine
     const handleChange = (index, field, value) => {
@@ -30,6 +40,12 @@ const UserInputForm = () => {
     // Add new medicine input fields: Allow user to dynamically add more medicines
     const addMedicine = () => {
         setMedicines([...medicines, { name: '', stock: '', demand: '' }]);
+    };
+
+    // Remove a specific medicine input group
+    const removeMedicine = (index) => {
+        const updatedMedicines = medicines.filter((_, i) => i !== index);
+        setMedicines(updatedMedicines);
     };
 
     return (
@@ -63,6 +79,17 @@ const UserInputForm = () => {
                         onChange={(e) => handleChange(index, 'demand', e.target.value)}
                         required
                     />
+
+                    {/* Button to remove a medicine input group */}
+                    {medicines.length > 1 && (
+                        <button
+                            type="button"
+                            onClick={() => removeMedicine(index)}
+                            className="remove-button"
+                        >
+                            Remove
+                        </button>
+                    )}
                 </div>
             ))}
 
@@ -78,7 +105,6 @@ const UserInputForm = () => {
 };
 
 export default UserInputForm;
-
 
 
 
