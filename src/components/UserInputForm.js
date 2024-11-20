@@ -1,48 +1,50 @@
 import React, { useState } from 'react';
+import { sendFormData } from '../services/apiService'; // Axios API service
 
 const UserInputForm = () => {
-    // State to manage a list of medicines
     const [medicines, setMedicines] = useState([{ name: '', stock: '', demand: '' }]);
-    // State to hold alert messages
     const [alertMessage, setAlertMessage] = useState('');
-    
-    // Handle form submission: Check for low stock and log submitted data
-    const handleSubmit = (e) => {
+    const [errorMessage, setErrorMessage] = useState('');
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        let alerts = []; // Array to collect multiple alerts
 
-        medicines.forEach(medicine => {
-            if (medicine.stock <= 20) {
-                alerts.push(`Warning: Low stock for ${medicine.name}!`);
-            }
-        });
+        // Validate form data
+        const invalidEntries = medicines.filter(
+            (medicine) => !medicine.name || medicine.stock <= 0 || medicine.demand <= 0
+        );
 
-        // Set the alert message based on collected alerts
-        if (alerts.length > 0) {
-            setAlertMessage(alerts.join(' ')); // Join alerts into a single string
-        } else {
-            setAlertMessage(''); // Clear alert if no conditions are met
+        if (invalidEntries.length > 0) {
+            setErrorMessage('Please provide valid inputs for all medicines.');
+            return;
         }
 
-        console.log('Form submitted with values:', medicines); // For demonstration purposes
+        try {
+            const response = await sendFormData(medicines); // Send validated data to backend
+            console.log('Response from backend:', response); // Log backend response
+            setAlertMessage('Data successfully sent to the backend!');
+            setErrorMessage('');
+        } catch (error) {
+            console.error('Error sending data:', error); // Log the error for debugging
+            setAlertMessage('');
+            setErrorMessage('Error sending data to the backend. Please try again.');
+        }
     };
 
-
-
-
-    // Handle input changes: Update state for a specific field of a specific medicine
+    // Handle input changes
     const handleChange = (index, field, value) => {
         const updatedMedicines = [...medicines];
         updatedMedicines[index][field] = value;
         setMedicines(updatedMedicines);
     };
 
-    // Add new medicine input fields: Allow user to dynamically add more medicines
+    // Add a new medicine input group
     const addMedicine = () => {
         setMedicines([...medicines, { name: '', stock: '', demand: '' }]);
     };
 
-    // Remove a specific medicine input group
+    // Remove a medicine input group
     const removeMedicine = (index) => {
         const updatedMedicines = medicines.filter((_, i) => i !== index);
         setMedicines(updatedMedicines);
@@ -50,7 +52,6 @@ const UserInputForm = () => {
 
     return (
         <form onSubmit={handleSubmit}>
-            {/* Loop through medicines array to create input fields for each medicine */}
             {medicines.map((medicine, index) => (
                 <div key={index} className="medicine-input-group">
                     <label htmlFor={`medicineName-${index}`}>Medicine Name:</label>
@@ -80,7 +81,6 @@ const UserInputForm = () => {
                         required
                     />
 
-                    {/* Button to remove a medicine input group */}
                     {medicines.length > 1 && (
                         <button
                             type="button"
@@ -93,18 +93,21 @@ const UserInputForm = () => {
                 </div>
             ))}
 
-            {/* Button to add new medicine input fields */}
             <button type="button" onClick={addMedicine}>Add Medicine</button>
-            {/* Submit button to submit the form */}
             <button type="submit">Submit</button>
 
-            {/* Display alert message if conditions are met */}
             {alertMessage && <div className="alert-message">{alertMessage}</div>}
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
         </form>
     );
 };
 
 export default UserInputForm;
+
+
+
+
+
 
 
 
