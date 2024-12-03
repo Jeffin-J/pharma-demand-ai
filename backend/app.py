@@ -4,6 +4,10 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend-backend communication
 
+@app.route('/')
+def home():
+    return jsonify(message="Welcome to the Pharma Demand AI backend!")
+
 @app.route('/submit-data', methods=['POST'])
 def submit_data():
     try:
