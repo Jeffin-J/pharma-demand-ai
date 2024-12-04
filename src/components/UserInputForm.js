@@ -29,24 +29,40 @@ const UserInputForm = () => {
     setFeedbackMessage("Medicine added successfully!");
   };
 
+  const handleRemoveMedicine = (index) => {
+    const updatedMedicines = medicines.filter((_, i) => i !== index);
+    setMedicines(updatedMedicines);
+    setFeedbackMessage("Medicine removed successfully!");
+  };
+
+
   const handleSubmit = async () => {
+    if (medicines.length === 0) {
+      setFeedbackMessage("No medicines to submit. Please add some first!");
+      return;
+    }
     try {
+      console.log("Medicines to be sent:", medicines); // Log medicines for debugging
       const response = await fetch("http://127.0.0.1:5000/submit-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ medicines }),
+        body: JSON.stringify(medicines), // Send the list of medicines
       });
       if (response.ok) {
         const data = await response.json();
         setFeedbackMessage("Data successfully sent to the backend!");
         console.log("Response from backend:", data);
       } else {
-        throw new Error("Failed to send data to the backend.");
+        const errorData = await response.json();
+        console.error("Backend error:", errorData);
+        setFeedbackMessage(
+          errorData.error || "Failed to send data to the backend."
+        );
       }
     } catch (error) {
-      console.error(error);
+      console.error("Frontend error:", error);
       setFeedbackMessage("Error sending data to the backend. Please try again.");
     }
   };
@@ -56,7 +72,9 @@ const UserInputForm = () => {
       <div className="form-container">
         <h1 className="title">Pharma Demand AI</h1>
         <p className="description">
-          A tool to manage medicine stock levels and forecast demand.
+          A tool to manage medicine stock levels and forecast demand!  <br /> <br />
+          Please fill out the form below to get started. Then, click <strong>Add Medicine </strong> 
+           to add a medicine to the list. Once you have added all the medicines, click <strong>Submit </strong>.
         </p>
         <form>
           <div className="form-group">
@@ -112,6 +130,26 @@ const UserInputForm = () => {
             </button>
           </div>
         </form>
+        
+        {medicines.length > 0 && (
+          <div className="medicine-list">
+            {medicines.map((medicine, index) => (
+              <div key={index} className="medicine-block">
+                <p>
+                  <strong>{medicine.name}</strong>: Stock - {medicine.stock}, Demand - {medicine.demand}
+                </p>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => handleRemoveMedicine(index)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+
         {feedbackMessage && (
           <div className="feedback-message">{feedbackMessage}</div>
         )}
@@ -121,3 +159,5 @@ const UserInputForm = () => {
 };
 
 export default UserInputForm;
+
+

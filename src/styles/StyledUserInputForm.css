@@ -100,3 +100,36 @@
     gap: 10px;
   }
 }
+
+/* Styling for medicine list container */
+.medicine-list {
+  margin-top: 20px;
+}
+
+/* Styling for each medicine block */
+.medicine-block {
+  background-color: #2b2b3c;
+  color: #ffffff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Remove button */
+.btn-danger {
+  background-color: #dc3545;
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #a71d2a;
+}
+
