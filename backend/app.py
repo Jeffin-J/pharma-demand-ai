@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
+from preprocess_data import load_and_preprocess_data
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend-backend communication
@@ -11,6 +12,16 @@ app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static')
 @app.route('/')
 def home():
     return jsonify(message="Welcome to the Pharma Demand AI backend!")
+
+@app.route('/get-processed-data', methods=['GET'])
+def get_processed_data():
+    try:
+        data = load_and_preprocess_data()
+        return data.to_json(orient='records')
+    except Exception as e:
+        return jsonify({"error": f"Failed to load processed data: {str(e)}"}), 500
+
+
 
 @app.route('/favicon.ico')
 def favicon():
