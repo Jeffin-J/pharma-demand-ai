@@ -1,131 +1,123 @@
-import React, { useState } from 'react';
-import { sendFormData } from '../services/apiService'; // Axios API service
+import React, { useState } from "react";
+import "../styles/StyledUserInputForm.css";
 
 const UserInputForm = () => {
-    const [medicines, setMedicines] = useState([{ name: '', stock: '', demand: '' }]); // Form data state
-    const [alertMessage, setAlertMessage] = useState(''); // Success message
-    const [errorMessage, setErrorMessage] = useState(''); // General error message
+  const [medicineData, setMedicineData] = useState({
+    name: "",
+    stock: "",
+    demand: "",
+  });
+  const [medicines, setMedicines] = useState([]);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
 
-    // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setMedicineData((prev) => ({ ...prev, [name]: value }));
+  };
 
-        try {
-            const response = await sendFormData(medicines); // Send data to backend
-            console.log('Response from backend:', response);
-            setAlertMessage('Data successfully sent to the backend!');
-            setErrorMessage('');
-        } catch (error) {
-            console.error('Error sending data:', error);
-            setAlertMessage('');
-            setErrorMessage('Error sending data to the backend. Please try again.');
-        }
-    };
+  const handleAddMedicine = () => {
+    if (!medicineData.name || !medicineData.stock || !medicineData.demand) {
+      setFeedbackMessage("Please fill out all fields!");
+      return;
+    }
+    if (isNaN(medicineData.stock) || isNaN(medicineData.demand)) {
+      setFeedbackMessage("Stock and demand must be numeric values!");
+      return;
+    }
+    setMedicines([...medicines, medicineData]);
+    setMedicineData({ name: "", stock: "", demand: "" });
+    setFeedbackMessage("Medicine added successfully!");
+  };
 
-    // Validate individual fields
-    const validateField = (field, value) => {
-        if (!value || value === '') {
-            return 'This field is required.';
-        }
-        if (field === 'stock' || field === 'demand') {
-            if (isNaN(value) || value <= 0) {
-                return 'Value must be a positive number.';
-            }
-        }
-        return '';
-    };
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/submit-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ medicines }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFeedbackMessage("Data successfully sent to the backend!");
+        console.log("Response from backend:", data);
+      } else {
+        throw new Error("Failed to send data to the backend.");
+      }
+    } catch (error) {
+      console.error(error);
+      setFeedbackMessage("Error sending data to the backend. Please try again.");
+    }
+  };
 
-    // Handle input changes and validation
-    const handleChange = (index, field, value) => {
-        const updatedMedicines = [...medicines];
-        updatedMedicines[index][field] = value;
-
-        // Set custom validity messages
-        const inputElement = document.getElementById(`${field}-${index}`);
-        const validationMessage = validateField(field, value);
-        if (inputElement) {
-            inputElement.setCustomValidity(validationMessage);
-            inputElement.reportValidity();
-        }
-
-        setMedicines(updatedMedicines);
-    };
-
-    // Add a new medicine input group
-    const addMedicine = () => {
-        setMedicines([...medicines, { name: '', stock: '', demand: '' }]);
-    };
-
-    // Remove a medicine input group
-    const removeMedicine = (index) => {
-        const updatedMedicines = medicines.filter((_, i) => i !== index);
-        setMedicines(updatedMedicines);
-    };
-
-    return (
-        <form onSubmit={handleSubmit}>
-            {medicines.map((medicine, index) => (
-                <div key={index} className="medicine-input-group">
-                    {/* Medicine Name Input */}
-                    <label htmlFor={`name-${index}`}>Medicine Name:</label>
-                    <input
-                        type="text"
-                        id={`name-${index}`}
-                        value={medicine.name}
-                        onChange={(e) => handleChange(index, 'name', e.target.value)}
-                        required
-                    />
-
-                    {/* Current Stock Input */}
-                    <label htmlFor={`stock-${index}`}>Current Stock:</label>
-                    <input
-                        type="number"
-                        id={`stock-${index}`}
-                        value={medicine.stock}
-                        onChange={(e) => handleChange(index, 'stock', e.target.value)}
-                        required
-                    />
-
-                    {/* Daily Demand Input */}
-                    <label htmlFor={`demand-${index}`}>Expected Daily Demand:</label>
-                    <input
-                        type="number"
-                        id={`demand-${index}`}
-                        value={medicine.demand}
-                        onChange={(e) => handleChange(index, 'demand', e.target.value)}
-                        required
-                    />
-
-                    {/* Remove Button */}
-                    {medicines.length > 1 && (
-                        <button type="button" onClick={() => removeMedicine(index)} className="remove-button">
-                            Remove
-                        </button>
-                    )}
-                </div>
-            ))}
-
-            <button type="button" onClick={addMedicine}>Add Medicine</button>
-            <button type="submit">Submit</button>
-
-            {/* General Messages */}
-            {alertMessage && <div className="alert-message">{alertMessage}</div>}
-            {errorMessage && <div className="error-message">{errorMessage}</div>}
+  return (
+    <div className="main-container">
+      <div className="form-container">
+        <h1 className="title">Pharma Demand AI</h1>
+        <p className="description">
+          A tool to manage medicine stock levels and forecast demand.
+        </p>
+        <form>
+          <div className="form-group">
+            <label htmlFor="medicineName">Medicine Name</label>
+            <input
+              type="text"
+              id="medicineName"
+              name="name"
+              value={medicineData.name}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="Enter medicine name"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="currentStock">Current Stock</label>
+            <input
+              type="text"
+              id="currentStock"
+              name="stock"
+              value={medicineData.stock}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="Enter current stock"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="dailyDemand">Expected Daily Demand</label>
+            <input
+              type="text"
+              id="dailyDemand"
+              name="demand"
+              value={medicineData.demand}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="Enter daily demand"
+            />
+          </div>
+          <div className="button-group">
+            <button
+              type="button"
+              onClick={handleAddMedicine}
+              className="btn btn-primary"
+            >
+              Add Medicine
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="btn btn-success"
+            >
+              Submit
+            </button>
+          </div>
         </form>
-    );
+        {feedbackMessage && (
+          <div className="feedback-message">{feedbackMessage}</div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default UserInputForm;
-
-
-
-
-
-
-
-
-
-
-
-
-

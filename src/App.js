@@ -4,7 +4,6 @@ import UserInputForm from './components/UserInputForm';
 function App() {
     return (
         <div>
-            <h1>Pharma Demand AI User Input</h1>
             <UserInputForm />
         </div>
     );
