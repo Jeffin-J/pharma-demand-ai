@@ -1,5 +1,6 @@
 import React from 'react';
 import UserInputForm from './components/UserInputForm';
+import Charts from "./components/Charts";
 
 function App() {
     return (
