@@ -1,3 +1,9 @@
+'''
+SOURCES:
+https://pandas.pydata.org/docs/
+https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MinMaxScaler
+'''
+
 import pandas as pd
 import os
 from sklearn.preprocessing import MinMaxScaler

@@ -1,3 +1,11 @@
+'''
+SOURCES:
+https://pypi.org/project/Flask-Cors/
+https://flask.palletsprojects.com/en/stable/api/
+
+'''
+
+
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os

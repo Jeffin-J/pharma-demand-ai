@@ -1,3 +1,8 @@
+/*
+SOURCES:
+https://react.dev/learn
+*/
+
 import React, { useState, useEffect } from "react";
 import "../styles/StyledUserInputForm.css";
 
